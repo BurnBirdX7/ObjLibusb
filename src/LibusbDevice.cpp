@@ -8,6 +8,15 @@ LibusbDevice::LibusbDevice(libusb_device *device, bool unreferenceOnDestruction)
         , mUnreferenceOnDestruction(unreferenceOnDestruction)
 {}
 
+
+LibusbDevice::LibusbDevice(LibusbDevice&& other) noexcept
+    : mDevice(other.mDevice)
+    , mUnreferenceOnDestruction(other.mUnreferenceOnDestruction)
+{
+    other.mDevice = nullptr;
+    other.mUnreferenceOnDestruction = false;
+}
+
 LibusbDevice::~LibusbDevice()
 {
     if (mUnreferenceOnDestruction)

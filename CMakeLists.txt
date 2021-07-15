@@ -19,7 +19,3 @@ add_library(obj_libusb ${OBJ_LIBUSB_SRC})
 find_package(Threads REQUIRED)
 target_link_libraries(obj_libusb PUBLIC usb-1.0 Threads::Threads)
 target_include_directories(obj_libusb PUBLIC include)
-
-#cheap replacement for tests:
-add_executable(lib_test test.cpp)
-target_link_libraries(lib_test PUBLIC obj_libusb)

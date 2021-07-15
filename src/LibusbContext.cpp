@@ -40,6 +40,7 @@ std::vector<LibusbDevice> LibusbContext::getDeviceVector()
         vector.push_back(LibusbDevice{list[i], true});
     }
 
+    libusb_free_device_list(list, 0);
     return vector;
 }
 
