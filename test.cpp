@@ -38,18 +38,10 @@ int main()
     return 0;
 }
 
-struct ConfigDeleter {
-    void operator() (libusb_config_descriptor* descriptor) {
-        libusb_free_config_descriptor(descriptor);
-    }
-};
-
-using unique_config_descriptor_ptr = std::unique_ptr<libusb_config_descriptor, ConfigDeleter>;
-
 struct InterfaceData {
-    size_t InterfaceNumber;
-    uint8_t writeEndpoint;
-    uint8_t readEndpoint;
+    size_t interfaceNumber;
+    uint8_t writeEndpointAddress;
+    uint8_t readEndpointAddress;
     uint16_t zeroMask;
     size_t packetSize;
 };
@@ -107,12 +99,12 @@ std::optional<InterfaceData> find_adb_interface(const LibusbDevice& device) {
 
                 if (is_endpoint_output(endpointAddress) && !found_out) {
                     found_out = true;
-                    data.writeEndpoint = endpointAddress;
+                    data.writeEndpointAddress = endpointAddress;
                     data.zeroMask = endpointDescriptor.wMaxPacketSize - 1;
                 }
                 else if (!is_endpoint_output(endpointAddress) && !found_in) {
                     found_in = true;
-                    data.readEndpoint = endpointAddress;
+                    data.readEndpointAddress = endpointAddress;
                 }
 
                 size_t endpointPacketSize = endpointDescriptor.wMaxPacketSize;
@@ -156,10 +148,10 @@ void print_info(const LibusbDevice& device) {
         if (optAdbInterface.has_value()) {
             const auto& adbInterface = optAdbInterface.value();
             std::cout << "\tADB: " << std::endl
-                      << "\t\t Write Endpoint: " << static_cast<uint>(adbInterface.writeEndpoint) << std::endl
-                      << "\t\t Read Endpoint: " << static_cast<uint>(adbInterface.readEndpoint) << std::endl
+                      << "\t\t Write Endpoint: " << static_cast<uint>(adbInterface.writeEndpointAddress) << std::endl
+                      << "\t\t Read Endpoint: " << static_cast<uint>(adbInterface.readEndpointAddress) << std::endl
                       << "\t\t Packet Size: " << adbInterface.packetSize << std::endl
-                      << "\t\t Interface Number: " << adbInterface.InterfaceNumber << std::endl
+                      << "\t\t Interface Number: " << adbInterface.interfaceNumber << std::endl
                       << "\t\t Zero mask: " << adbInterface.zeroMask << std::endl
                       << std::endl;
         }

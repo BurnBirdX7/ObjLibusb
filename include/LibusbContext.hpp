@@ -8,8 +8,13 @@
 
 class LibusbContext {
 public:
+    using LogLevel = libusb_log_level;
+    //using LogCallback = void (*)(LibusbContext& context, LogLevel level, std::string message);
     using LogCallback = libusb_log_cb;
     using LogCallbackMode = libusb_log_cb_mode;
+
+    using HotplugEvent = libusb_hotplug_event;
+    //using HotplugCallback = int (*)(LibusbDevice& device, HotplugEvent event, void* userData);
     using HotplugCallback = libusb_hotplug_callback_fn;
     using HotplugCallbackHandle = libusb_hotplug_callback_handle;
 
@@ -50,6 +55,7 @@ public: // USB Descriptors
 private:
     libusb_context* mContext;
     bool mHandleEvents;
+    bool mOwnsContext;
 };
 
 

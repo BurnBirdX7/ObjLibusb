@@ -11,6 +11,7 @@ LibusbContext::LibusbContext()
     libusb_init(&mContext);
 }
 
+
 LibusbContext::~LibusbContext()
 {
     mHandleEvents = false;
@@ -62,14 +63,16 @@ LibusbContext::HotplugCallbackHandle LibusbContext::registerHotplugCallback(int 
                                                                             LibusbContext::HotplugCallback callback,
                                                                             void *userData)
 {
-    HotplugCallbackHandle handle;
+    HotplugCallbackHandle handle{};
+    auto callbackWrapper = callback; // TODO: Wrapper
+
     int rc = libusb_hotplug_register_callback(mContext,
                                               static_cast<libusb_hotplug_event>(events),
                                               static_cast<libusb_hotplug_flag>(flags),
                                               vendorId,
                                               productId,
                                               deviceClass,
-                                              callback,
+                                              callbackWrapper,
                                               userData,
                                               &handle);
     CHECK_ERROR(rc)
