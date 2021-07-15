@@ -12,7 +12,7 @@ set(OBJ_LIBUSB_SRC
         src/LibusbDeviceList.cpp
         src/LibusbError.cpp
         src/LibusbDeviceHandle.cpp
-        )
+        src/LibusbTransfer.cpp)
 
 add_library(obj_libusb ${OBJ_LIBUSB_SRC})
 
