@@ -13,7 +13,7 @@ class LibusbTransfer
 public:
     using Pointer = std::shared_ptr<LibusbTransfer>;
     using WeakPointer = Pointer::weak_type;
-    using TransferCallback = std::function<void(const Pointer& transfer, void* data)>;
+    using TransferCallback = std::function<void(const Pointer& transfer)>;
 
     enum State : uint8_t {
         EMPTY           = 0,
@@ -82,20 +82,11 @@ public:
     static void sCallbackWrapper(libusb_transfer* transfer);
 
 private:
-    struct CallbackData {
-        void* userData; // the data user wants to pass to a callback function
-        TransferCallback userCallback;
-        Pointer transfer;
-    };
-
     explicit LibusbTransfer(int isoPacketsNumber);
     libusb_transfer* mTransfer;
     State mState;
-
-    CallbackData* makeCallbackData(void* userData, TransferCallback&& callback);
-    void* getCallbackUserData() const;
-    CallbackData* getCallbackData() const;
-    void freeCallbackData();
+    TransferCallback mUserCallback;
+    void* mUserData;
 };
 
 
