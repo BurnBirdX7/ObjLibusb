@@ -105,13 +105,13 @@ uint8_t LibusbTransfer::getStatus() const
     return mTransfer->status;
 }
 
-uint8_t LibusbTransfer::getLength() const
+int LibusbTransfer::getLength() const
 {
     assert(mState >= READY);
     return mTransfer->length;
 }
 
-uint8_t LibusbTransfer::getActualLength() const
+int LibusbTransfer::getActualLength() const
 {
     assert(mState == IN_CALLBACK);
     return mTransfer->actual_length;
@@ -156,6 +156,25 @@ void LibusbTransfer::reset()
 
     mTransfer = libusb_alloc_transfer(isoPackets);
     mState = EMPTY;
+}
+
+uint8_t* LibusbTransfer::getBuffer() const
+{
+    assert(mState >= READY);
+    return mTransfer->buffer;
+}
+
+void LibusbTransfer::setNewBuffer(unsigned char* buffer, uint8_t length)
+{
+    assert(mState == READY || mState == IN_CALLBACK);
+    mTransfer->buffer = buffer;
+    mTransfer->length = length;
+}
+
+void LibusbTransfer::setNewUserData(void* userData)
+{
+    assert(mState == READY || mState == IN_CALLBACK);
+    mUserData = userData;
 }
 
 

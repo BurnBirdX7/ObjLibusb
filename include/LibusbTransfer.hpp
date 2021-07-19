@@ -63,9 +63,13 @@ public:
     uint8_t getType() const;
     uint getTimeout() const;
     uint8_t getStatus() const;
-    uint8_t getLength() const;
-    uint8_t getActualLength() const;
+    int getLength() const;
+    int getActualLength() const;
+    uint8_t* getBuffer() const;
     void* getUserData() const;
+
+    void setNewBuffer(unsigned char* buffer, uint8_t length);
+    void setNewUserData(void* userData);
 
     State getState() const;
     void reset(); // Can be performed only in READY state
