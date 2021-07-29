@@ -260,14 +260,11 @@ std::optional<LibusbTransfer::SharedLock> LibusbTransfer::processVariantLock(con
 
 bool LibusbTransfer::isVariantLocked(const LibusbTransfer::VariantLock& lockPtr) const
 {
-    const UniqueLock* const uniqueLock = std::get_if<UniqueLock>(&lockPtr);
-    const SharedLock* const sharedLock = std::get_if<SharedLock>(&lockPtr);
+    if (std::holds_alternative<const UniqueLock*>(lockPtr))
+        return isLocked(*std::get<const UniqueLock*>(lockPtr));
 
-    if (uniqueLock != nullptr)
-        return isLocked(*uniqueLock);
-
-    if (sharedLock != nullptr)
-        return isLocked(*sharedLock);
+    if (std::holds_alternative<const SharedLock*>(lockPtr))
+        return isLocked(*std::get<const SharedLock*>(lockPtr));
 
     return false;
 }

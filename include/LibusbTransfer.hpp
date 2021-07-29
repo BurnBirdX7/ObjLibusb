@@ -17,7 +17,7 @@ class LibusbTransfer
 public:
     using SharedLock = std::shared_lock<std::shared_mutex>;
     using UniqueLock = std::unique_lock<std::shared_mutex>;
-    using VariantLock = std::variant<nullptr_t, SharedLock, UniqueLock>;
+    using VariantLock = std::variant<nullptr_t, const SharedLock*, const UniqueLock*>;
 
     using Pointer = std::shared_ptr<LibusbTransfer>;
     using WeakPointer = Pointer::weak_type;
