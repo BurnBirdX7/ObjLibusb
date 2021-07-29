@@ -102,7 +102,7 @@ public:
                   TransferCallback          callback,
                   void*                     userData,
                   unsigned int              timeout,
-                  const UniqueLock*         lock);
+                  const UniqueLock*         lock = nullptr);
 
     // ...
     static void sCallbackWrapper(libusb_transfer* transfer);
