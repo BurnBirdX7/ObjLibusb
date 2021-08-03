@@ -23,11 +23,12 @@ public:
     using WeakPointer = Pointer::weak_type;
     using TransferCallback = std::function<void(const Pointer& transfer, const UniqueLock& lock)>;
 
-    enum State : uint8_t {
-        EMPTY           = 0,
-        READY           = 1,
-        SUBMITTED       = 2,
-        IN_CALLBACK     = 3
+    enum State : int {
+        CANCELLING      = -1,
+        EMPTY           =  0,
+        READY           =  1,
+        SUBMITTED       =  2,
+        IN_CALLBACK     =  3,
     };
 
     enum Type : uint8_t {
@@ -63,8 +64,8 @@ public:
     static Pointer createTransfer(int isoPacketsNumber = 0);
 
     // Control
-    void submit(); // READY-state only
-    void cancel(); // SUBMITTED-state only
+    void submit(const UniqueLock* lock); // READY-state only
+    void cancel(const UniqueLock* lock); // SUBMITTED-state only
 
     // Locks
     SharedLock getSharedLock() const;
@@ -110,7 +111,7 @@ public:
 private:
     // Callback's auxiliary
     void* prepareUserData();
-    static Pointer* getTransferFromUserData(void* userData);
+    static WeakPointer* getWeakTransferFromUserData(void* userData);
     static void freeUserData(void* userData);
 
     // Threads auxiliary
