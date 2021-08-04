@@ -217,9 +217,9 @@ void LibusbTransfer::staticCallbackWrapper(libusb_transfer* libusbTransfer)
     transfer->callbackWrapper(&lock);
 
     // Destroy shared pointer
-    delete shared;
     transfer->mTransfer->user_data = nullptr;
     transfer->mState = READY;
+    delete shared;
 }
 
 void LibusbTransfer::staticSubmitTransfer(LibusbTransfer& transfer)
@@ -227,7 +227,8 @@ void LibusbTransfer::staticSubmitTransfer(LibusbTransfer& transfer)
     // This function constructs shared pointer from *this* in dynamic memory
     // This shared pointer has to be destroyed in callback
 
-    transfer.mTransfer->user_data = new SharedPointer{transfer.shared_from_this()};
+    auto* shared = new SharedPointer{transfer.shared_from_this()};
+    transfer.mTransfer->user_data = shared;
     CHECK_LIBUSB_ERROR(libusb_submit_transfer(transfer.mTransfer))
     transfer.mState = SUBMITTED;
 }
