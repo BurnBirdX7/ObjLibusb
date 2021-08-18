@@ -34,7 +34,7 @@ if (MSVC) # MSVC
     endif()
 
     if ((LIBUSB_INCLUDE_DIRS STREQUAL "") OR ("LIBUSB_LIBRARIES" STREQUAL ""))
-        message(SEND_ERROR "libusb path's are not set")
+        message(SEND_ERROR "libusb paths are not set")
     else()
         if (EXISTS "${LIBUSB_INCLUDE_DIRS}/libusb.h")
             message("Strange vcpkg libusb include path detected...")
@@ -45,13 +45,13 @@ if (MSVC) # MSVC
         message(NOTICE "libusb library dirs: ${LIBUSB_LIBRARIES}")
     endif()
 
-    target_include_directories(ObjLibusb PRIVATE include ${LIBUSB_INCLUDE_DIRS})
-    target_link_libraries(ObjLibusb PRIVATE ${LIBUSB_LIBRARIES})
+    target_include_directories(ObjLibusb PUBLIC include ${LIBUSB_INCLUDE_DIRS})
+    target_link_libraries(ObjLibusb PUBLIC ${LIBUSB_LIBRARIES})
 
 else() # NOT MSVC
 
     find_package(Threads REQUIRED)
-    target_link_libraries(ObjLibusb PRIVATE usb-1.0 Threads::Threads)
-    target_include_directories(ObjLibusb PRIVATE include)
+    target_link_libraries(ObjLibusb PUBLIC usb-1.0 Threads::Threads)
+    target_include_directories(ObjLibusb PUBLIC include)
 
 endif()
