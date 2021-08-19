@@ -72,7 +72,7 @@ if (MSVC) # MSVC
     target_link_libraries(ObjLibusb PUBLIC ${LIBUSB_LIBRARIES})
     target_include_directories(ObjLibusb PUBLIC
             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${headers_dir}>
-            $<INSTALL_INTERFACE:${headers_destination}/include>
+            $<INSTALL_INTERFACE:${headers_destination}>
             ${LIBUSB_INCLUDE_DIRS})
 
 else() # NOT MSVC
