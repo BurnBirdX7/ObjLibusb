@@ -81,3 +81,27 @@ You can just link built binary to your target
 target_link_libraries(MyTarget PUBLIC [path to build dir]/ObjLibusb.a) # can be .lib or any other
 target_include_directories(MyTarget PUBLIC [path to objlibusb's repo]/include)
 ```
+
+## Examples
+### Windows (MSVC)
+ * **libusb** installed via vcpkg
+```shell
+> git clone https://github.com/BurnBirdX7/ObjLibusb
+> cd .\ObjLibusb\
+> mkdir build
+> cd .\build\
+> cmake -DCMAKE_TOOLCHAIN_FILE=C:/dev/vcpkg/scripts/buildsystems/vcpkg.cmake ..
+> cmake --build . --config Release
+# to build library only:
+> cmake --build . --config Release --target adblib
+```
+
+### Linux
+* **libusb** installed with apt
+```shell
+$ git clone https://github.com/BurnBirdX7/ObjLibusb
+$ cd ObjLibusb/
+$ mkdir build && cd build
+$ cmake -DCMAKE_BUILD_TYPE=Release ..
+$ cmake --build .
+```
