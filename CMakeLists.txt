@@ -44,7 +44,12 @@ set(cmake_destination
 add_library(ObjLibusb
         ${source})
 
-# build:
+# Build
+
+target_include_directories(ObjLibusb PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${headers_dir}>
+        $<INSTALL_INTERFACE:${headers_destination}>)
+
 if (MSVC) # MSVC
     message(NOTICE "Trying to find libusb...")
     find_package(libusb CONFIG)
@@ -71,17 +76,12 @@ if (MSVC) # MSVC
 
     target_link_libraries(ObjLibusb PUBLIC ${LIBUSB_LIBRARIES})
     target_include_directories(ObjLibusb PUBLIC
-            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${headers_dir}>
-            $<INSTALL_INTERFACE:${headers_destination}>
             ${LIBUSB_INCLUDE_DIRS})
 
 else() # NOT MSVC
 
     find_package(Threads REQUIRED)
     target_link_libraries(ObjLibusb PUBLIC usb-1.0 Threads::Threads)
-    target_include_directories(ObjLibusb PUBLIC
-            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${headers_dir}>
-            $<INSTALL_INTERFACE:${headers_destination}>)
 
 endif()
 
