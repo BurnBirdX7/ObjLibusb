@@ -6,22 +6,46 @@ message(${CMAKE_SOURCE_DIR})
 
 set(CMAKE_CXX_STANDARD 17)
 
-set(OBJLIBUSB_SRC
-        src/Device.cpp
-        src/Context.cpp
-        src/DeviceList.cpp
-        src/Error.cpp
-        src/DeviceHandle.cpp
-        src/Transfer.cpp)
+set(ObjLibusb_VERSION 1.0)
 
-add_library(ObjLibusb ${OBJLIBUSB_SRC})
+set(headers_dir include)
+set(headers
+        ${headers_dir}/ObjLibusb.hpp
+        ${headers_dir}/ObjLibusb/Context.hpp
+        ${headers_dir}/ObjLibusb/Descriptors.hpp
+        ${headers_dir}/ObjLibusb/DeviceHandle.hpp
+        ${headers_dir}/ObjLibusb/Device.hpp
+        ${headers_dir}/ObjLibusb/DeviceList.hpp
+        ${headers_dir}/ObjLibusb/Error.hpp
+        ${headers_dir}/ObjLibusb/ObjLibusb.hpp
+        ${headers_dir}/ObjLibusb/Transfer.hpp)
 
+set(source_dir src)
+set(source
+        ${source_dir}/Device.cpp
+        ${source_dir}/Context.cpp
+        ${source_dir}/DeviceList.cpp
+        ${source_dir}/Error.cpp
+        ${source_dir}/DeviceHandle.cpp
+        ${source_dir}/Transfer.cpp)
+
+set(cmake_config
+        cmake/ObjLibusbConfig.cmake)
+
+set(lib_destination
+        lib/ObjLibusb-${ObjLibusb_VERSION})
+
+set(headers_destination
+        include/ObjLibusb-${ObjLibusb_VERSION})
+
+set(cmake_destination
+        ${lib_destination})
+
+add_library(ObjLibusb
+        ${source})
+
+# build:
 if (MSVC) # MSVC
-
-    set(LIBUSB_INCLUDE_DIRS)
-    set(LIBUSB_LIBRARIES)
-    set(VCPKG_ROOT "_" CACHE PATH "Path to vcpkg's root, required if you want to use packages installed by vcpkg")
-
     message(NOTICE "Trying to find libusb...")
     find_package(libusb CONFIG)
 
@@ -45,13 +69,26 @@ if (MSVC) # MSVC
         message(NOTICE "libusb library dirs: ${LIBUSB_LIBRARIES}")
     endif()
 
-    target_include_directories(ObjLibusb PUBLIC include ${LIBUSB_INCLUDE_DIRS})
     target_link_libraries(ObjLibusb PUBLIC ${LIBUSB_LIBRARIES})
+    target_include_directories(ObjLibusb PUBLIC
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${headers_dir}>
+            $<INSTALL_INTERFACE:${headers_destination}/include>
+            ${LIBUSB_INCLUDE_DIRS})
 
 else() # NOT MSVC
 
     find_package(Threads REQUIRED)
     target_link_libraries(ObjLibusb PUBLIC usb-1.0 Threads::Threads)
-    target_include_directories(ObjLibusb PUBLIC include)
+    target_include_directories(ObjLibusb PUBLIC
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${headers_dir}>
+            $<INSTALL_INTERFACE:${headers_destination}>)
 
 endif()
+
+#install
+install(TARGETS ObjLibusb EXPORT ObjLibusb DESTINATION ${lib_destination}/${CMAKE_BUILD_TYPE})
+install(EXPORT ObjLibusb DESTINATION ${lib_destination}/${CMAKE_BUILD_TYPE})
+
+install(FILES ${headers_dir}/ObjLibusb.hpp DESTINATION ${headers_destination})  # headers...
+install(DIRECTORY ${headers_dir}/ObjLibusb DESTINATION ${headers_destination})  # ...headers
+install(FILES ${cmake_config} DESTINATION ${cmake_destination})                 # package

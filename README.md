@@ -31,23 +31,53 @@ cd ObjLibusb
 ## Build
 
 ```shell
-mkdir build && cd build   # make dior for build and go there
-cmake ..                  # generate project
-cmake --build .           # build
+mkdir build && cd build             # make dir for build and go there
+cmake -DCMAKE_BUILD_TYPE=Release .. # generate project
+cmake --build .                     # build
 ```
 
 ### vcpkg
 if you use **vcpkg** you may need to set `CMAKE_TOOLCHAIN_FILE`
-to `[vcpkg root]/scripts/buildsystems/vcpkg.cmake` on generation step.\
-It will be
+to `[vcpkg root]/scripts/buildsystems/vcpkg.cmake` on generation step.:
 ```shell
 cmake -DCMAKE_TOOLCHAIN_FILE=[vcpkg root]/scripts/buildsystems/vcpkg.cmake ..
 ```
 
+### MSVC
+When compiler is MSVC you need to specify configuration on building step:
+```shell
+cmake --build . --config Release
+```
+
 ### ...other
-if CMake cannot find the library's package
+if CMake cannot find libusb's package
 you can set direct paths via variables `LIBUSB_INCLUDE_DIR` and `LIBUSB_LIBRARY`.\
 It will be (*project generation step*)
 ```shell
 cmake -DLIBUSB_INCLUDE_DIR=[path_to_include] -DLIBUSB_LIBRARY=[path_to_binary] ..
+```
+
+## Install
+```shell
+cmake --install .
+```
+You may need administrator's privileges to execute this command.
+
+## Use
+```cmake
+find_package(ObjLibusb REQUIRED)
+target_link_libraries(MyTarget PUBLIC ObjLibusb)
+```
+If CMake cannot find installed package, add path to ObjLibusb's installation dir to `CMAKE_PREFIX_PATH` variable:
+```cmake
+set(CMAKE_PREFIX_PATH "[objlibusb's installation path];${CMAKE_PREFIX_PATH}")
+```
+(On Windows default installation path is `C:/Program Files (x86)/ObjLibusb`)
+
+### Without installation
+
+You can just link built binary to your target
+```cmake
+target_link_libraries(MyTarget PUBLIC [path to build dir]/ObjLibusb.a) # can be .lib or any other
+target_include_directories(MyTarget PUBLIC [path to objlibusb's repo]/include)
 ```
