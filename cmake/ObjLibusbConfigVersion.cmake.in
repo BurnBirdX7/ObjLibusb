@@ -1,0 +1,65 @@
+
+
+set(PACKAGE_VERSION "@ObjLibusb_VERSION@")
+set(PACKAGE_VERSION_EXACT false)
+set(PACKAGE_VERSION_COMPATIBLE false)
+set(PACKAGE_VERSION_UNSUITABLE false)
+
+set(count ${PACKAGE_FIND_VERSION_COUNT})
+set(state unsuitable)
+
+if (${count} EQUAL 1) # 1
+
+    if ("${PACKAGE_FIND_VERSION_MAJOR}" EQUAL "@ObjLibusb_VERSION_MAJOR@")          # same major
+        set(state exact)
+    endif()
+
+elseif(${count} EQUAL 2)
+
+    if ("${PACKAGE_FIND_VERSION_MAJOR}" EQUAL "@ObjLibusb_VERSION_MAJOR@")          # same major
+
+        if ("${PACKAGE_FIND_VERSION_MINOR}" LESS "@ObjLibusb_VERSION_MINOR@")       # compatible minor
+            set(state compatible)
+        elseif("${PACKAGE_FIND_VERSION_MINOR}" EQUAL "@ObjLibusb_VERSION_MINOR@")   # exact minor
+            set(state exact)
+        endif()
+
+    endif()
+
+elseif(${count} EQUAL 3)
+
+
+    if ("${PACKAGE_FIND_VERSION_MAJOR}" EQUAL "@ObjLibusb_VERSION_MAJOR@")          # same major
+
+        if ("${PACKAGE_FIND_VERSION_MINOR}" LESS "@ObjLibusb_VERSION_MINOR@")       # compatible minor
+            set(state compatible)
+        elseif("${PACKAGE_FIND_VERSION_MINOR}" EQUAL "@ObjLibusb_VERSION_MINOR@")   # same minor
+            if (${ObjLibusb_VERSION_PATCH} LESS @ObjLibusb_VERSION_PATCH@)          # compatible patch
+                set(state compatible)
+            elseif (${ObjLibusb_VERSION_PATCH} EQUAL @ObjLibusb_VERSION_PATCH@)     # exact patch
+                set(state exact)
+            endif()
+        endif()
+
+    endif()
+
+else() # unsupported amount of components
+
+    message(NOTICE "ObjLibusb Version Configuration: Unsupported amount of version components: ${count}")
+
+endif()
+
+if(${state} STREQUAL "compatible")
+    set(PACKAGE_VERSION_EXACT false)
+    set(PACKAGE_VERSION_COMPATIBLE true)
+    set(PACKAGE_VERSION_UNSUITABLE false)
+elseif(${state} STREQUAL "exact")
+    set(PACKAGE_VERSION_EXACT true)
+    set(PACKAGE_VERSION_COMPATIBLE true)
+    set(PACKAGE_VERSION_UNSUITABLE false)
+else() # "unsuitable" or any unknown value
+    set(PACKAGE_VERSION_EXACT false)
+    set(PACKAGE_VERSION_COMPATIBLE false)
+    set(PACKAGE_VERSION_UNSUITABLE true)
+endif()
+

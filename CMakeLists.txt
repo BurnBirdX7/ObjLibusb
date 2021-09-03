@@ -6,8 +6,15 @@ message(${CMAKE_SOURCE_DIR})
 
 set(CMAKE_CXX_STANDARD 17)
 
-set(ObjLibusb_VERSION 1.0)
+### SETUP GENERAL VARIABLES ###
 
+set(ObjLibusb_VERSION_MAJOR 1)
+set(ObjLibusb_VERSION_MINOR 0)
+set(ObjLibusb_VERSION_PATCH 0)
+set(ObjLibusb_VERSION "${ObjLibusb_VERSION_MAJOR}.${ObjLibusb_VERSION_MINOR}.${ObjLibusb_VERSION_PATCH}")
+
+
+# Headers
 set(headers_dir include)
 set(headers
         ${headers_dir}/ObjLibusb.hpp
@@ -20,6 +27,7 @@ set(headers
         ${headers_dir}/ObjLibusb/ObjLibusb.hpp
         ${headers_dir}/ObjLibusb/Transfer.hpp)
 
+# Source Files
 set(source_dir src)
 set(source
         ${source_dir}/Device.cpp
@@ -29,8 +37,16 @@ set(source
         ${source_dir}/DeviceHandle.cpp
         ${source_dir}/Transfer.cpp)
 
-set(cmake_config
-        cmake/ObjLibusbConfig.cmake)
+# Cmake Configuration
+configure_file( cmake/ObjLibusbConfigVersion.cmake.in
+                cmake/ObjLibusbConfigVersion.cmake
+                @ONLY
+                )
+
+# Convenience Variables
+set(cmake_config_files
+        cmake/ObjLibusbConfig.cmake
+        ${CMAKE_CURRENT_BINARY_DIR}/cmake/ObjLibusbConfigVersion.cmake)
 
 set(lib_destination
         lib/ObjLibusb-${ObjLibusb_VERSION})
@@ -44,51 +60,75 @@ set(cmake_destination
 add_library(ObjLibusb
         ${source})
 
-# Build
+# * Build * #
 
 target_include_directories(ObjLibusb PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${headers_dir}>
         $<INSTALL_INTERFACE:${headers_destination}>)
 
-if (MSVC) # MSVC
-    message(NOTICE "Trying to find libusb...")
-    find_package(libusb CONFIG)
 
-    if (NOT ${libusb_FOUND})
-        message(NOTICE "libusb not found with find_package()...")
-        message(NOTICE "checking supplied variables...")
+### FIND AND LINK libusb ###
 
-        set(LIBUSB_INCLUDE_DIRS ${LIBUSB_INCLUDE_DIR})
-        set(LIBUSB_LIBRARIES ${LIBUSB_LIBRARY})
-    endif()
+if (DEFINED LIBUSB_INCLUDE_DIRS AND DEFINED LIBUSB_LIBRARIES) # If user provided paths
 
-    if ((LIBUSB_INCLUDE_DIRS STREQUAL "") OR ("LIBUSB_LIBRARIES" STREQUAL ""))
-        message(SEND_ERROR "libusb paths are not set")
-    else()
-        if (EXISTS "${LIBUSB_INCLUDE_DIRS}/libusb.h")
-            message("Strange vcpkg libusb include path detected...")
-            set(LIBUSB_INCLUDE_DIRS "${LIBUSB_INCLUDE_DIRS}/../")
-        endif()
+    message(NOTICE " ~~ LIBUSB_INCLUDE_DIRS and LIBUSB_LIBRARIES are defined... There will be no attempt to find libusb...")
+    message(NOTICE " ~~ ObjLibusb is going to be configured with this paths")
 
-        message(NOTICE "libusb include dirs: ${LIBUSB_INCLUDE_DIRS}")
-        message(NOTICE "libusb library dirs: ${LIBUSB_LIBRARIES}")
-    endif()
-
-    target_link_libraries(ObjLibusb PUBLIC ${LIBUSB_LIBRARIES})
+    target_link_libraries(ObjLibusb PUBLIC
+            ${LIBUSB_LIBRARIES})
     target_include_directories(ObjLibusb PUBLIC
             ${LIBUSB_INCLUDE_DIRS})
 
-else() # NOT MSVC
+elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "GCC")
+    # Under Linux and with GCC compiler it is possible to link libusb without finding it
+    # TODO: Check and test this
 
-    find_package(Threads REQUIRED)
-    target_link_libraries(ObjLibusb PUBLIC usb-1.0 Threads::Threads)
+    target_link_libraries(ObjLibusb PUBLIC
+            usb-1.0
+            Threads::Threads)
 
+else () #
+
+    message(STATUS " ~~ Trying to find libusb via find_package()")
+    find_package(libusb REQUIRED)
+
+    # Check for untypical include path
+    if (EXISTS "${LIBUSB_INCLUDE_DIRS}/libusb.h")
+        message(STATUS " ~~ Untypical libusb include path detected... Trying to include ${LIBUSB_INCLUDE_DIRS}/../")
+        set(LIBUSB_INCLUDE_DIRS "${LIBUSB_INCLUDE_DIRS}/../")
+    endif()
+
+    target_link_libraries(ObjLibusb PUBLIC
+            ${LIBUSB_LIBRARIES})
+    target_include_directories(ObjLibusb PUBLIC
+            ${LIBUSB_INCLUDE_DIRS})
+
+endif ()
+
+
+### FIND AND LINK THREADS ###
+
+find_package(Threads REQUIRED)
+target_link_libraries(ObjLibusb PUBLIC
+        Threads::Threads)
+
+### CONFIGURE INSTALLATION ###
+
+if (DEFINED ObjLibusb_CONFIG_NAME)
+    set(config_name ${ObjLibusb_CONFIG_NAME})
+elseif(DEFINED CMAKE_BUILD_TYPE)
+    set(config_name ${CMAKE_BUILD_TYPE})
+else()
+    message(WARNING " ~~ Neither ObjLibusb_CONFIG_NAME nor CMAKE_BUILD_TYPE is set...")
+    set(config_name "unspecified")
 endif()
+message(STATUS " ~~ Configuration name: ${config_name}")
 
-#install
-install(TARGETS ObjLibusb EXPORT ObjLibusb DESTINATION ${lib_destination}/${CMAKE_BUILD_TYPE})
-install(EXPORT ObjLibusb DESTINATION ${lib_destination}/${CMAKE_BUILD_TYPE})
 
-install(FILES ${headers_dir}/ObjLibusb.hpp DESTINATION ${headers_destination})  # headers...
-install(DIRECTORY ${headers_dir}/ObjLibusb DESTINATION ${headers_destination})  # ...headers
-install(FILES ${cmake_config} DESTINATION ${cmake_destination})                 # package
+# * Install * #
+install(TARGETS ObjLibusb EXPORT ObjLibusb DESTINATION ${lib_destination}/${config_name}) # install lib and add it to export
+install(EXPORT ObjLibusb DESTINATION ${lib_destination}/${config_name})                   # install export file
+
+install(FILES ${headers_dir}/ObjLibusb.hpp DESTINATION ${headers_destination})  # general header
+install(DIRECTORY ${headers_dir}/ObjLibusb DESTINATION ${headers_destination})  # headers
+install(FILES ${cmake_config_files} DESTINATION ${cmake_destination})           # cmake package configuration
