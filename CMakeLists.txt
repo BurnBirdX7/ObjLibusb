@@ -1,9 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 project(ObjLibusb)
 
-
-message(${CMAKE_SOURCE_DIR})
-
 set(CMAKE_CXX_STANDARD 17)
 
 ### SETUP GENERAL VARIABLES ###
@@ -12,7 +9,6 @@ set(ObjLibusb_VERSION_MAJOR 1)
 set(ObjLibusb_VERSION_MINOR 0)
 set(ObjLibusb_VERSION_PATCH 0)
 set(ObjLibusb_VERSION "${ObjLibusb_VERSION_MAJOR}.${ObjLibusb_VERSION_MINOR}.${ObjLibusb_VERSION_PATCH}")
-
 
 # Headers
 set(headers_dir include)
@@ -60,14 +56,15 @@ set(cmake_destination
 add_library(ObjLibusb
         ${source})
 
-# * Build * #
+### Build ###
 
 target_include_directories(ObjLibusb PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${headers_dir}>
         $<INSTALL_INTERFACE:${headers_destination}>)
 
 
-### FIND AND LINK libusb ###
+
+# FIND AND LINK libusb #
 
 if (DEFINED LIBUSB_INCLUDE_DIRS AND DEFINED LIBUSB_LIBRARIES) # If user provided paths
 
@@ -106,26 +103,29 @@ else () #
 endif ()
 
 
-### FIND AND LINK THREADS ###
+
+# FIND AND LINK THREADS #
 
 find_package(Threads REQUIRED)
 target_link_libraries(ObjLibusb PUBLIC
         Threads::Threads)
 
+
 ### CONFIGURE INSTALLATION ###
 
-if (DEFINED ObjLibusb_CONFIG_NAME)
-    set(config_name ${ObjLibusb_CONFIG_NAME})
-elseif(DEFINED CMAKE_BUILD_TYPE)
-    set(config_name ${CMAKE_BUILD_TYPE})
+set(install_name "ObjLibusb_CONFIG_NAME")
+set(install_name_docstring "Name of the configuration under which this of the library will be installed")
+
+if(DEFINED CMAKE_BUILD_TYPE AND NOT ${CMAKE_BUILD_TYPE} STREQUAL "")
+    set(${install_name} ${CMAKE_BUILD_TYPE} CACHE STRING "${install_name_docstring}")
 else()
-    message(WARNING " ~~ Neither ObjLibusb_CONFIG_NAME nor CMAKE_BUILD_TYPE is set...")
-    set(config_name "unspecified")
+    set(${install_name} "Release" CACHE STRING "${install_name_docstring}")
 endif()
-message(STATUS " ~~ Configuration name: ${config_name}")
+
+set(config_name ${${install_name}})
+message(STATUS " ~~ ObjLibusb configuration name: ${config_name} (This name can be used to install and later find installed configuration)")
 
 
-# * Install * #
 install(TARGETS ObjLibusb EXPORT ObjLibusb DESTINATION ${lib_destination}/${config_name}) # install lib and add it to export
 install(EXPORT ObjLibusb DESTINATION ${lib_destination}/${config_name})                   # install export file
 

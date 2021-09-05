@@ -8,7 +8,11 @@ set(PACKAGE_VERSION_UNSUITABLE false)
 set(count ${PACKAGE_FIND_VERSION_COUNT})
 set(state unsuitable)
 
-if (${count} EQUAL 1) # 1
+if (${count} EQUAL 0)
+
+    set(state compatible)
+
+elseif (${count} EQUAL 1) # 1
 
     if ("${PACKAGE_FIND_VERSION_MAJOR}" EQUAL "@ObjLibusb_VERSION_MAJOR@")          # same major
         set(state exact)
@@ -34,9 +38,9 @@ elseif(${count} EQUAL 3)
         if ("${PACKAGE_FIND_VERSION_MINOR}" LESS "@ObjLibusb_VERSION_MINOR@")       # compatible minor
             set(state compatible)
         elseif("${PACKAGE_FIND_VERSION_MINOR}" EQUAL "@ObjLibusb_VERSION_MINOR@")   # same minor
-            if (${ObjLibusb_VERSION_PATCH} LESS @ObjLibusb_VERSION_PATCH@)          # compatible patch
+            if ("${PACKAGE_FIND_VERSION_PATCH}" LESS "@ObjLibusb_VERSION_PATCH@")      # compatible patch
                 set(state compatible)
-            elseif (${ObjLibusb_VERSION_PATCH} EQUAL @ObjLibusb_VERSION_PATCH@)     # exact patch
+            elseif ("${PACKAGE_FIND_VERSION_PATCH}" EQUAL "@ObjLibusb_VERSION_PATCH@") # exact patch
                 set(state exact)
             endif()
         endif()
