@@ -76,13 +76,12 @@ if (DEFINED LIBUSB_INCLUDE_DIRS AND DEFINED LIBUSB_LIBRARIES) # If user provided
     target_include_directories(ObjLibusb PUBLIC
             ${LIBUSB_INCLUDE_DIRS})
 
-elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "GCC")
+elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
     # Under Linux and with GCC compiler it is possible to link libusb without finding it
     # TODO: Check and test this
 
     target_link_libraries(ObjLibusb PUBLIC
-            usb-1.0
-            Threads::Threads)
+            usb-1.0)
 
 else () #
 
